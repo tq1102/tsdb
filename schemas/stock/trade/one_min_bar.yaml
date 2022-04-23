@@ -1,0 +1,15 @@
+# https://tushare.pro/document/2?doc_id=109
+
+
+table: one_min_bar
+
+func: ts.pro_bar
+
+input:
+  !R ts_code : !Q stock_basic.ts_code
+  start_date: !G "%Y-%m-%d 00:00:00"
+  end_date: !G "%Y-%m-%d 00:00:00"
+  freq: '1min'
+
+limit: 8000
+cursor: trade_time

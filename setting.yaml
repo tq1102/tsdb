@@ -1,0 +1,15 @@
+schemas:
+ - stock_basic
+ - hfq_daily
+
+subprocess: 'D:\Projects\quant\tsdb\main.py'
+
+tushare_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+db: mysql+pymysql://root:xxxxxxxxxxx@localhost:3306/tsdb_test
+
+max_workers: 50
+
+pool_size: 60
+
+retry_delay: 1

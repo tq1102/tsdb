@@ -1,0 +1,15 @@
+# https://tushare.pro/document/2?doc_id=28
+
+
+table: adj_factor
+
+func: ts.pro_api().adj_factor
+
+input:
+  !R ts_code : !Q stock_basic.ts_code
+  start_date: !G %Y%m%d
+  end_date: !G %Y%m%d
+
+
+limit: 5000
+cursor: trade_date

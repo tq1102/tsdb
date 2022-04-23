@@ -1,0 +1,11 @@
+# https://tushare.pro/document/2?doc_id=25
+
+table: stock_basic
+
+func: ts.pro_api().stock_basic
+
+input:
+  !R list_status: [L,D,P]
+  fields: ts_code, symbol, name, area, industry, fullname, enname, cnspell, market, exchange, curr_type, list_date, delist_date, is_hs
+
+if_exists: replace
