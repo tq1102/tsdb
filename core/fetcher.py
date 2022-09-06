@@ -14,7 +14,9 @@ class Fetcher(object):
         self.parser = parser
         self.dumper = dumper
 
-        self.tracked = list()
+        self.finish = 0
+        self.total = 0
+
         self.executor = futures.ThreadPoolExecutor(
             max_workers=Setting['max_workers'])
 
@@ -36,19 +38,21 @@ class Fetcher(object):
 
     def _fetch(self, func_obj, kwargs, limit, executor):
         fetched = func_obj(**kwargs)
-        if fetched and len(fetched):
+        if fetched is not None and len(fetched):
             if len(fetched) == limit:
                 next_end = fetched.iloc[-1][self.parser.cursor]
                 kwargs['end_date'] = next_end
 
-                future = executor.submit(
+                executor.submit(
                     self._fetch,
                     func_obj, kwargs, limit, executor)
-                self.tracked.append(future)
                 return fetched[:-1]
             else:
                 assert len(fetched) < limit
+                self.finish += 1
                 return fetched
+        else:
+            self.finish += 1
 
     def fetch(self):
         table_created = False
@@ -60,32 +64,21 @@ class Fetcher(object):
                 self.dumper.create_table(
                     func_obj(**kwargs), self.parser.table)
 
-            future = self.executor.submit(
+            self.executor.submit(
                 self._pipeline,
                 func_obj, kwargs, self.parser.limit, self.executor)
-            self.tracked.append(future)
+
+            self.total += 1
 
     def _pipeline(self, *args, **kwargs):
         fetched = self._fetch(*args, **kwargs)
-        if fetched and len(fetched) > 0:
+        if fetched is not None and len(fetched) > 0:
             self.dumper.dump(fetched, self.parser.table)
 
     def wait(self):
         shutdown = False
         while not shutdown:
-            if (self.executor._work_queue.empty() and
-                    len(self.tracked) == 0):
-                self.executor.shutdown()
+            if self.finish == self.total:
                 shutdown = True
 
-            done = [(i, future)
-                    for i, future
-                    in enumerate(self.tracked)
-                    if future.done()]
-            idx_desc = sorted(done, key=lambda x: x[0], reverse=True)
-
-            for i, future in idx_desc:
-                future.result()
-                del self.tracked[i]
-
-            del done
+        self.executor.shutdown(wait=True)

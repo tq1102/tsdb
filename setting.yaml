@@ -2,11 +2,9 @@ schemas:
  - stock_basic
  - hfq_daily
 
-subprocess: 'D:\Projects\quant\tsdb\main.py'
+tushare_token: !Env tushare_token
 
-tushare_token: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-
-db: mysql+pymysql://root:xxxxxxxxxxx@localhost:3306/tsdb_test
+tsdb: !Env tsdb
 
 max_workers: 50
 

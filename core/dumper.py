@@ -1,10 +1,10 @@
 import pandas as pd
-from sqlalchemy.types import NVARCHAR, Date, DateTime
+from sqlalchemy.types import VARCHAR, Date, DateTime
 
 
 class Dumper(object):
     dtypes_map = {
-        'ts_code': NVARCHAR(length=255),
+        'ts_code': VARCHAR(length=255),
         'trade_date': Date(),
         'trade_time': DateTime(),
     }
@@ -24,7 +24,7 @@ class Dumper(object):
 
     def dump(self, df, table):
         conn = self.engine.connect()
-        self.trans_map.setdefault(conn, default=conn.begin())
+        self.trans_map.setdefault(conn, conn.begin())
         
         df.to_sql(table, conn, if_exists='append', index=False)
 

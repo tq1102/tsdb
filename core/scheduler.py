@@ -49,7 +49,7 @@ class ScheduleRecord(Base):
 class Scheduler(object):
     def __init__(self, setting):
         self.setting = setting
-        self.engine = create_engine(setting['db'])
+        self.engine = create_engine(setting['tsdb'])
 
         ScheduleRecord.create_table(self.engine)
 
@@ -77,7 +77,7 @@ class Scheduler(object):
         ]
 
     def run(self):
-        main = self.setting['subprocess']
+        main = PROJECT.joinpath('main.py')
         in_tasks, de_tasks = self.deliver_task()
 
         for schema, start, end in in_tasks:
@@ -93,6 +93,7 @@ class Scheduler(object):
 
 
 if __name__ == '__main__':
-    from .setting import Setting
+    from core.setting import Setting
     s = Scheduler(Setting)
     s.run()
+    # Set changed size during iteration 错误没反馈 直接通过了
