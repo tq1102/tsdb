@@ -1,12 +1,14 @@
 import sys
 import subprocess
 from pathlib import Path
+import datetime
 
 
 from sqlalchemy import String, DateTime, Integer
 from sqlalchemy import Column
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
+from sqlalchemy import select, func
 
 
 PROJECT = Path(__file__).resolve().parent.parent
@@ -16,20 +18,22 @@ Base = declarative_base()
 
 class SchemaManager(object):
     @staticmethod
-    def all():
+    def schemas():
         root = PROJECT.joinpath('schemas')
         paths = root.rglob('*.yaml')
         return {p.stem: p for p in paths}
 
     @staticmethod
-    def ind(all):
+    def sorted():
         independent = {}
-        for schema, path in all.items():
+        dependent = {}
+        for schema, path in SchemaManager.schemas().items():
             with open(path, "r") as f:
                 if '!Q' in f.read():
-                    continue
+                    dependent[schema] = path
                 else:
                     independent[schema] = path
+        independent.update(dependent)
         return independent
 
 
@@ -53,47 +57,38 @@ class Scheduler(object):
 
         ScheduleRecord.create_table(self.engine)
 
-    def _setting_schemas(self):
-        return {k: v for k, v in SchemaManager.all().items()
-                if k in self.setting['schemas']}
+    def query(self):
+        query = select([
+            ScheduleRecord.schema,
+            func.max(ScheduleRecord.end_date),
+        ]).group_by(ScheduleRecord.schema)
 
-    def figure_task(self):
-        """
-        according to db & independent_schema
-        """
-        pass
+        return self.engine.execute(query).fetchall()
 
-    def deliver_task(self):
-        """
-        TODO: code stub for now
-        """
-        # return [
-        #     [('stock_basic', '10010101', '20220410')],
-        #     [('hfq_daily', '10010101', '20220410'), ('one_min_bar', '10010101', '20220410')]
-        # ]
-        return [
-            [('stock_basic', '10010101', '20220409')],
-            [('hfq_daily', '20220410', '20220420')]
-        ]
+    def update_plan(self):
+        intent = {k: v for k, v in SchemaManager.sorted().items()
+                     if k in self.setting['schemas']}
+        progress = dict(self.query())
 
-    def run(self):
+        yesterday = datetime.date.today() + datetime.timedelta(-1)
+        end = yesterday.strftime('%Y%m%d')
+
+        for schema in intent:
+            start = progress[schema].strftime('%Y%m%d') if schema in progress else '10010101'
+            yield schema, start, end
+
+    def update(self):
         main = PROJECT.joinpath('main.py')
-        in_tasks, de_tasks = self.deliver_task()
+        tasks = self.update_plan()
 
-        for schema, start, end in in_tasks:
+        for schema, start, end in tasks:
             cmds = [sys.executable, main, schema, start, end]
             last = subprocess.Popen(cmds,
                                     creationflags=subprocess.CREATE_NEW_CONSOLE)
-        last.wait()
-
-        for schema, start, end in de_tasks:
-            cmds = [sys.executable, main, schema, start, end]
-            subprocess.Popen(cmds,
-                             creationflags=subprocess.CREATE_NEW_CONSOLE)
+            last.wait()
 
 
 if __name__ == '__main__':
     from core.setting import Setting
     s = Scheduler(Setting)
-    s.run()
-    # Set changed size during iteration 错误没反馈 直接通过了
+    s.update()

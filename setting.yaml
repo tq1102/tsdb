@@ -6,8 +6,6 @@ tushare_token: !Env tushare_token
 
 tsdb: !Env tsdb
 
-max_workers: 50
+concurrency: 64 # default max_connections 100
 
-pool_size: 60
-
-retry_delay: 1
+retry_delay: 60

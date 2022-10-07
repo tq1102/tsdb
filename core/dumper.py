@@ -1,6 +1,9 @@
+import queue
+
 import pandas as pd
 from sqlalchemy.types import VARCHAR, Date, DateTime
 
+from .setting import Setting
 
 class Dumper(object):
     dtypes_map = {
@@ -9,27 +12,22 @@ class Dumper(object):
         'trade_time': DateTime(),
     }
 
-    def __init__(self, engine, parser):
-        self.engine = engine
+    def __init__(self, conn, parser):
+        self.conn = conn
         self.parser = parser
-        self.trans_map = {}
+        self.queue = queue.Queue(maxsize=Setting['concurrency'])
 
-    def rollback(self):
-        for t in self.trans_map.values():
-            t.rollback()
 
-    def commit(self):
-        for t in self.trans_map.values():
-            t.commit()
+    def dump(self):
+        df, table = self.queue.get()
+        df.to_sql(table, self.conn, if_exists='append', index=False)
 
-    def dump(self, df, table):
-        conn = self.engine.connect()
-        self.trans_map.setdefault(conn, conn.begin())
-        
-        df.to_sql(table, conn, if_exists='append', index=False)
+    def put(self, *df_n_table):
+        self.queue.put(df_n_table)
 
     def create_table(self, df, table):
-        pandas_sql = pd.io.sql.pandasSQL_builder(self.engine.connect())
+        # regular table
+        pandas_sql = pd.io.sql.pandasSQL_builder(self.conn)
 
         sql_table = pd.io.sql.SQLTable(
             table,
@@ -40,4 +38,25 @@ class Dumper(object):
             dtype=self.dtypes_map,
             keys=self.parser.keys
         )
+
+        is_new = not sql_table.exists()
         sql_table.create()
+        if is_new:
+            if self.parser.cursor:
+                # hypertable
+                hypertable_query = """
+                SELECT create_hypertable(
+                '{table}',
+                '{time}',
+                chunk_time_interval => INTERVAL '1 month'
+                );
+                """.format(table=table, time=self.parser.cursor)
+
+                # index
+                index_query = """
+                CREATE INDEX {table}_symbol_time ON {table} (ts_code, {time} DESC);
+                """.format(table=table, time=self.parser.cursor)
+
+                # execute
+                self.conn.execute(hypertable_query)
+                self.conn.execute(index_query)

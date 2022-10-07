@@ -16,9 +16,10 @@ class Fetcher(object):
 
         self.finish = 0
         self.total = 0
+        self.futures = []
 
         self.executor = futures.ThreadPoolExecutor(
-            max_workers=Setting['max_workers'])
+            max_workers=Setting['concurrency'])
 
     def _func_obj(self):
         func_obj = eval(self.parser.func)
@@ -43,9 +44,10 @@ class Fetcher(object):
                 next_end = fetched.iloc[-1][self.parser.cursor]
                 kwargs['end_date'] = next_end
 
-                executor.submit(
-                    self._fetch,
+                f = executor.submit(
+                    self._pipelined_fetch,
                     func_obj, kwargs, limit, executor)
+                self.futures.append(f)
                 return fetched[:-1]
             else:
                 assert len(fetched) < limit
@@ -53,6 +55,11 @@ class Fetcher(object):
                 return fetched
         else:
             self.finish += 1
+
+    def _pipelined_fetch(self, *args, **kwargs):
+        fetched = self._fetch(*args, **kwargs)
+        if fetched is not None and len(fetched) > 0:
+            self.dumper.put(fetched, self.parser.table)
 
     def fetch(self):
         table_created = False
@@ -64,21 +71,24 @@ class Fetcher(object):
                 self.dumper.create_table(
                     func_obj(**kwargs), self.parser.table)
 
-            self.executor.submit(
-                self._pipeline,
+            f = self.executor.submit(
+                self._pipelined_fetch,
                 func_obj, kwargs, self.parser.limit, self.executor)
+            self.futures.append(f)
 
             self.total += 1
 
-    def _pipeline(self, *args, **kwargs):
-        fetched = self._fetch(*args, **kwargs)
-        if fetched is not None and len(fetched) > 0:
-            self.dumper.dump(fetched, self.parser.table)
-
     def wait(self):
         shutdown = False
-        while not shutdown:
+        while not (shutdown and self.dumper.queue.empty()):
+            print(self.finish, r'/',  self.total, end="\r")
+
+            self.dumper.dump()
+
             if self.finish == self.total:
                 shutdown = True
+
+        for i, f in enumerate(self.futures):
+            f.result()
 
         self.executor.shutdown(wait=True)

@@ -19,6 +19,10 @@ class Parser(object):
         return self.config[name]
 
     @property
+    def cursor(self):
+        return self.config.get('cursor', None)
+
+    @property
     def keys(self):
         return self.config.get('keys', None)
 
