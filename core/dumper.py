@@ -6,11 +6,16 @@ from sqlalchemy.types import VARCHAR, Date, DateTime
 from .setting import Setting
 
 class Dumper(object):
-    dtypes_map = {
-        'ts_code': VARCHAR(length=255),
-        'trade_date': Date(),
-        'trade_time': DateTime(),
-    }
+    def dtypes_map(self, df):
+        mapping = {}
+        for field in df.columns:
+            if field.endswith('code'):
+                mapping[field] = VARCHAR(length=255)
+            if field.endswith('date'):
+                mapping[field] = Date()
+            if field.endswith('time'):
+                mapping[field] = DateTime()
+        return mapping
 
     def __init__(self, conn, parser):
         self.conn = conn
@@ -35,7 +40,7 @@ class Dumper(object):
             frame=df,
             index=False,
             if_exists=self.parser.if_exists,
-            dtype=self.dtypes_map,
+            dtype=self.dtypes_map(df),
             keys=self.parser.keys
         )
 

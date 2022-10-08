@@ -1,0 +1,10 @@
+# https://tushare.pro/document/2?doc_id=26
+
+table: trade_cal
+
+func: ts.pro_api().trade_cal
+
+input:
+  fields: exchange, cal_date, is_open, pretrade_date
+
+if_exists: replace
