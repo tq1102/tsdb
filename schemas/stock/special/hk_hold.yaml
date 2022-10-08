@@ -1,24 +1,17 @@
-# https://tushare.pro/document/2?doc_id=109
+# https://tushare.pro/document/2?doc_id=188
 
 
-table: hfq_daily
+table: hk_hold
 
-func: ts.pro_bar
+func: ts.pro_api().hk_hold
 
 
 input:
   !R ts_code : !Q stock_basic.ts_code
   start_date: !G "%Y%m%d"
   end_date: !G "%Y%m%d"
-  adj: hfq
-  factors:
-    - tor
-    - vr
-  adjfactor: 1
 
-
-limit: 5000
+limit: 4200
 cursor: trade_date
-freq: 200
 keys: ['ts_code', 'trade_date']
 if_exists: 'append'

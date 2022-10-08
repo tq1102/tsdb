@@ -1,0 +1,10 @@
+# https://tushare.pro/document/2?doc_id=19
+
+table: fund_basic
+
+func: ts.pro_api().fund_basic
+
+input:
+  !R offset: [0, 15000]
+
+if_exists: replace

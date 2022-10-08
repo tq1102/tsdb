@@ -1,0 +1,13 @@
+# https://tushare.pro/document/2?doc_id=121
+
+
+table: fund_portfolio
+
+func: ts.pro_api().fund_portfolio
+
+
+input:
+  !R ts_code : !Q stock_basic.ts_code
+
+
+if_exists: 'replace'

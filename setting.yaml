@@ -1,8 +1,9 @@
 schemas:
  - stock_basic
  - hfq_daily
+ - hk_hold
 
-tushare_token: !Env tushare_token
+tushare_token: !Env tushare_token_bk
 
 tsdb: !Env tsdb
 
