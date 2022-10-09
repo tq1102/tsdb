@@ -20,6 +20,7 @@ engine = create_engine(Setting['tsdb'], poolclass=NullPool)
 SCHEMA, START, END = 1, 2, 3
 
 
+
 def from_argv():
     return dict(
         schema_path=SchemaManager.schemas()[sys.argv[SCHEMA]],

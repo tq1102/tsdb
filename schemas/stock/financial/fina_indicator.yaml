@@ -15,3 +15,5 @@ input:
 
 if_exists: append
 limit: 100
+time_column_name: end_date
+keys: ['ts_code', 'end_date', 'update_flag']

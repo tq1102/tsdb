@@ -5,6 +5,8 @@ table: fund_basic
 func: ts.pro_api().fund_basic
 
 input:
-  !R offset: [0, 15000]
+  !R market: [E, O]
 
 if_exists: replace
+
+limit: 15000

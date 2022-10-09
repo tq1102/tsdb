@@ -19,8 +19,12 @@ class Parser(object):
         return self.config[name]
 
     @property
-    def cursor(self):
-        return self.config.get('cursor', None)
+    def time_column_name(self):
+        return self.config.get('time_column_name', None)
+
+    @property
+    def symbol_column_name(self):
+        return self.config.get('symbol_column_name', 'ts_code')
 
     @property
     def keys(self):
@@ -32,7 +36,7 @@ class Parser(object):
 
     @property
     def limit(self):
-        return self.config.get('limit', float('inf'))
+        return self.config.get('limit')
 
     @property
     def _input(self):

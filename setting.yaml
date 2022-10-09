@@ -1,11 +1,13 @@
 schemas:
  - stock_basic
+ - hfq_daily
  - fund_basic
  - trade_cal
  - hfq_daily
  - hk_hold
  - fina_indicator
- - fund_portfolio
+
+# - fund_portfolio
 
 
 tushare_token: !Env tushare_token_bk

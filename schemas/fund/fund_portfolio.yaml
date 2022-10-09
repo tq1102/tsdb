@@ -1,5 +1,5 @@
 # https://tushare.pro/document/2?doc_id=121
-
+# index created in dumper may not be appropriate
 
 table: fund_portfolio
 
@@ -14,3 +14,6 @@ input:
 
 if_exists: append
 limit: 4000
+time_column_name: end_date
+symbol_column_name: symbol
+# NO primary key there were identical records in tushare

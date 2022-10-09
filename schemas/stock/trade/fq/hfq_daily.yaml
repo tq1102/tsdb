@@ -5,20 +5,14 @@ table: hfq_daily
 
 func: ts.pro_bar
 
-
 input:
   !R ts_code : !Q stock_basic.ts_code
   start_date: !G "%Y%m%d"
   end_date: !G "%Y%m%d"
   adj: hfq
-  factors:
-    - tor
-    - vr
   adjfactor: 1
 
-
 limit: 5000
-cursor: trade_date
-freq: 200
+time_column_name: trade_date
 keys: ['ts_code', 'trade_date']
 if_exists: 'append'

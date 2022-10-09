@@ -5,6 +5,7 @@ from sqlalchemy.types import VARCHAR, Date, DateTime
 
 from .setting import Setting
 
+
 class Dumper(object):
     def dtypes_map(self, df):
         mapping = {}
@@ -24,8 +25,11 @@ class Dumper(object):
 
 
     def dump(self):
-        df, table = self.queue.get()
-        df.to_sql(table, self.conn, if_exists='append', index=False)
+        try:
+            df, table = self.queue.get(block=False)
+            df.to_sql(table, self.conn, if_exists='append', index=False)
+        except queue.Empty:
+            return
 
     def put(self, *df_n_table):
         self.queue.put(df_n_table)
@@ -47,7 +51,7 @@ class Dumper(object):
         is_new = not sql_table.exists()
         sql_table.create()
         if is_new:
-            if self.parser.cursor:
+            if self.parser.time_column_name:
                 # hypertable
                 hypertable_query = """
                 SELECT create_hypertable(
@@ -55,12 +59,15 @@ class Dumper(object):
                 '{time}',
                 chunk_time_interval => INTERVAL '1 month'
                 );
-                """.format(table=table, time=self.parser.cursor)
+                """.format(table=table, time=self.parser.time_column_name)
 
                 # index
                 index_query = """
-                CREATE INDEX {table}_symbol_time ON {table} (ts_code, {time} DESC);
-                """.format(table=table, time=self.parser.cursor)
+                CREATE INDEX {table}_symbol_time ON {table} ({symbol_column_name}, {time} DESC);
+                """.format(
+                    table=table,
+                    symbol_column_name=self.parser.symbol_column_name,
+                    time=self.parser.time_column_name)
 
                 # execute
                 self.conn.execute(hypertable_query)

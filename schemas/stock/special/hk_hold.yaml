@@ -12,6 +12,6 @@ input:
   end_date: !G "%Y%m%d"
 
 limit: 4200
-cursor: trade_date
+time_column_name: trade_date
 keys: ['ts_code', 'trade_date']
 if_exists: 'append'
