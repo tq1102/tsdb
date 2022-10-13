@@ -1,0 +1,10 @@
+# https://tushare.pro/document/2?doc_id=182
+
+table: index_member
+
+func: ts.pro_api().index_member
+
+input: {}
+
+if_exists: replace
+limit: 3000

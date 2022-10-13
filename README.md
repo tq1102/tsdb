@@ -1,7 +1,5 @@
-#### Tushare 下载数据 
+#### tushare 数据本地化
+TimescaleDB(Postgresql的插件, 100%SQL) 
 
-1.TimeScaleDB 时序数据库.
+###### 文档：https://a1il6hff6t.feishu.cn/docx/Xmpbd6wyAoozCExsbjncfaFHnqc?from=from_copylink
 
-2.支持多线程，数据库事务，增量更新.
-
-#### TSDB技术交流群(文档教程)：6991666

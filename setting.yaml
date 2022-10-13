@@ -6,11 +6,11 @@ schemas:
  - hfq_daily
  - hk_hold
  - fina_indicator
+ - fund_portfolio
+ - index_classify
 
-# - fund_portfolio
 
-
-tushare_token: !Env tushare_token_bk
+tushare_token: !Env tushare_token
 
 tsdb: !Env tsdb
 

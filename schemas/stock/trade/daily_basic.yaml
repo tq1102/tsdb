@@ -1,0 +1,17 @@
+# https://tushare.pro/document/2?doc_id=32
+
+
+table: daily_basic
+
+func: ts.pro_api().daily_basic
+
+input:
+  !R ts_code : !Q stock_basic.ts_code
+  start_date: !G "%Y%m%d"
+  end_date: !G "%Y%m%d"
+  fields: ts_code, trade_date, close,turnover_rate, turnover_rate_f, volume_ratio, pe,pe_ttm ,pb ,ps ,ps_ttm ,dv_ratio ,dv_ttm ,total_share ,float_share ,free_share ,total_mv ,circ_mv ,limit_status
+
+limit: 5000
+time_column_name: trade_date
+keys: ['ts_code', 'trade_date']
+if_exists: 'append'

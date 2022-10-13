@@ -1,0 +1,18 @@
+# https://tushare.pro/document/2?doc_id=109
+# https://tushare.pro/document/1?doc_id=234
+
+
+table: mins
+
+func: ts.pro_bar
+
+input:
+  !R ts_code : !Q stock_basic.ts_code
+  start_date: !G "%Y-%m-%d 09:00:00"
+  end_date: !G "%Y-%m-%d 17:00:00"
+  freq: 1min
+
+limit: 8000
+time_column_name: trade_time
+keys: ['ts_code', 'trade_time']
+if_exists: 'append'

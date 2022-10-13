@@ -1,0 +1,10 @@
+# https://tushare.pro/document/2?doc_id=181
+
+table: index_classify
+
+func: ts.pro_api().index_classify
+
+input:
+  src: SW2021
+
+if_exists: replace

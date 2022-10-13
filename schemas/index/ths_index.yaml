@@ -1,0 +1,9 @@
+# https://tushare.pro/document/2?doc_id=259
+
+table: ths_index
+
+func: ts.pro_api().ths_index
+
+input: {}
+
+if_exists: replace
